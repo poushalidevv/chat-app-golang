@@ -6,6 +6,7 @@ import (
     "net/http"
     "github.com/gorilla/websocket"
 	"chat-app-golang/db"
+	"chat-app-golang/handlers"
 )
 
 var upgrader = websocket.Upgrader{
@@ -19,8 +20,9 @@ func main() {
 	db.InitPostgres()
 	db.InitRedis()
     // Set up routes
-    http.HandleFunc("/register", RegisterHandler)
+	http.HandleFunc("/register", handlers.RegisterHandler)
     http.HandleFunc("/login", LoginHandler)
+    http.HandleFunc("/logout", handlers.LogoutHandler)
     http.HandleFunc("/messages", SendMessageHandler)
     http.HandleFunc("/chat", HandleWebSocket) // WebSocket endpoint
 

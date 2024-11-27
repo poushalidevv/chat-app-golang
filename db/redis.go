@@ -1,24 +1,27 @@
 package db
 
 import (
-    "context"
-    "fmt"
-    "log"
-    "github.com/go-redis/redis/v8"
+	"log"
+	"github.com/go-redis/redis/v8"
+	"golang.org/x/net/context"
 )
 
 var RedisClient *redis.Client
-var ctx = context.Background()
 
+// InitRedis initializes the Redis connection
 func InitRedis() {
-    RedisClient = redis.NewClient(&redis.Options{
-        Addr: "redis:6379", // Redis server address
-    })
+	// Redis running on localhost:6379
+	RedisClient = redis.NewClient(&redis.Options{
+		Addr: "localhost:6379", // Use 'localhost' or the actual IP if running in Docker
+		Password: "",
+		DB:   0,                // Default DB
+	})
 
-    _, err := RedisClient.Ping(ctx).Result()
-    if err != nil {
-        log.Fatalf("Unable to connect to Redis: %v", err)
-    }
+	// Test the connection
+	_, err := RedisClient.Ping(context.Background()).Result()
+	if err != nil {
+		log.Fatalf("Unable to connect to Redis: %v", err)
+	}
 
-    fmt.Println("Successfully connected to Redis!")
+	log.Println("Successfully connected to Redis!")
 }
