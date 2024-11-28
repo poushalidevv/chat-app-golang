@@ -5,8 +5,9 @@ import (
     "log"
     "net/http"
     "github.com/gorilla/websocket"
-	"chat-app-golang/db"
-	"chat-app-golang/handlers"
+    "github.com/gorilla/mux"
+    "chat-app-golang/db"
+    "chat-app-golang/handlers"
 )
 
 var upgrader = websocket.Upgrader{
@@ -17,32 +18,42 @@ var upgrader = websocket.Upgrader{
 
 func main() {
 
-	db.InitPostgres()
-	db.InitRedis()
+    db.InitPostgres()
+    db.InitRedis()
+
+    // Create a new router
+    r := mux.NewRouter()
+
     // Set up routes
-	http.HandleFunc("/register", handlers.RegisterHandler)
-    http.HandleFunc("/login", LoginHandler)
-    http.HandleFunc("/logout", handlers.LogoutHandler)
-    http.HandleFunc("/messages", SendMessageHandler)
-    http.HandleFunc("/chat", HandleWebSocket) // WebSocket endpoint
+    r.HandleFunc("/register", handlers.RegisterHandler).Methods("POST")
+    r.HandleFunc("/login", handlers.LoginHandler).Methods("GET")
+    r.HandleFunc("/logout", handlers.LogoutHandler).Methods("GET")
+
+    // Profile handling with GET and PUT methods
+    r.HandleFunc("/profile", func(w http.ResponseWriter, r *http.Request) {
+        switch r.Method {
+        case "GET":
+            handlers.GetProfileHandler(w, r)  // GET: Retrieve user profile
+        case "PUT":
+            handlers.UpdateProfileHandler(w, r) // PUT: Update user profile
+        default:
+            http.Error(w, "Invalid HTTP method", http.StatusMethodNotAllowed)
+        }
+    })
+
+    // Messaging routes with method-specific handlers
+    r.HandleFunc("/messages", handlers.SendMessageHandler).Methods("POST")
+    r.HandleFunc("/messages", handlers.GetMessagesHandler).Methods("GET")
+
+    // WebSocket route
+    r.HandleFunc("/chat", HandleWebSocket)
 
     // Start the server
     fmt.Println("Server starting on :8080...")
-    log.Fatal(http.ListenAndServe(":8080", nil))
+    log.Fatal(http.ListenAndServe(":8080", r))
 }
 
-func RegisterHandler(w http.ResponseWriter, r *http.Request) {
-    fmt.Fprintf(w, "User registration handler")
-}
-
-func LoginHandler(w http.ResponseWriter, r *http.Request) {
-    fmt.Fprintf(w, "User login handler")
-}
-
-func SendMessageHandler(w http.ResponseWriter, r *http.Request) {
-    fmt.Fprintf(w, "Send message handler")
-}
-
+// WebSocket handler
 func HandleWebSocket(w http.ResponseWriter, r *http.Request) {
     conn, err := upgrader.Upgrade(w, r, nil)
     if err != nil {

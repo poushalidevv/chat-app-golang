@@ -4,13 +4,12 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
-// User model definition
 type User struct {
 	gorm.Model
-	ID       uint   `gorm:"primary_key"`
-	Username string `gorm:"type:varchar(255);unique_index"`
-	Email    string `gorm:"type:varchar(255);unique_index"`
-	Password string `gorm:"type:varchar(255)"`
+	Name     string `json:"name"`
+	Username string `json:"username" gorm:"unique"`
+	Email    string `json:"email" gorm:"unique"`
+	Password string `json:"password"`
 }
 
 type UserLogin struct {

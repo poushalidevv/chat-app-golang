@@ -32,5 +32,6 @@ func InitPostgres() {
 
 	
 	DB.AutoMigrate(&models.User{}) 
+	DB.AutoMigrate(&models.Message{})
 	fmt.Println("Database schema migrated!")
 }
