@@ -1,6 +1,7 @@
 package db
 
 import (
+	"os"
 	"context"
 	"fmt"
 	"log"
@@ -17,8 +18,8 @@ var DB *gorm.DB       // GORM DB object for ORM and AutoMigrate
 func InitPostgres() {
 	var err error
 
-	
-	Conn, err = pgx.Connect(context.Background(), "postgres://postgres:Aviral123@localhost:5432/chat_app")
+	connstr := os.Getenv("DATABASE_URL")
+	Conn, err = pgx.Connect(context.Background(), connstr)
 	if err != nil {
 		log.Fatalf("Unable to connect to database using pgx: %v", err)
 	}

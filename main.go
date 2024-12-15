@@ -8,6 +8,7 @@ import (
     "github.com/gorilla/mux"
     "chat-app-golang/db"
     "chat-app-golang/handlers"
+    "github.com/joho/godotenv"
 )
 
 var upgrader = websocket.Upgrader{
@@ -17,6 +18,11 @@ var upgrader = websocket.Upgrader{
 }
 
 func main() {
+
+    err := godotenv.Load()
+    if err != nil {
+        log.Fatalf("Error loading .env file")
+    }
 
     db.InitPostgres()
     db.InitRedis()
@@ -45,8 +51,11 @@ func main() {
     r.HandleFunc("/messages", handlers.SendMessageHandler).Methods("POST")
     r.HandleFunc("/messages", handlers.GetMessagesHandler).Methods("GET")
 
+    r.HandleFunc("/conversations", handlers.ListConversationsHandler).Methods("GET")
+    r.HandleFunc("/conversations", handlers.CreateConversationHandler).Methods("POST")
+    r.HandleFunc("/conversations/{conversation_id}", handlers.GetConversationHandler).Methods("GET")
     // WebSocket route
-    r.HandleFunc("/chat", HandleWebSocket)
+    r.HandleFunc("/chat", handlers.HandleWebSocket)
 
     // Start the server
     fmt.Println("Server starting on :8080...")
@@ -66,15 +75,18 @@ func HandleWebSocket(w http.ResponseWriter, r *http.Request) {
 
     // Handle WebSocket communication here (e.g., read messages, send messages)
     for {
+        fmt.Println("Waiting for message...")
         msgType, msg, err := conn.ReadMessage()
         if err != nil {
+            fmt.Println("Error reading message:", err)
             log.Println(err)
             return
         }
-
+        fmt.Printf("Received message: %s\n", msg)
         // Echo the received message back to the client
         err = conn.WriteMessage(msgType, msg)
         if err != nil {
+            fmt.Println("Error writing message:", err)
             log.Println(err)
             return
         }
