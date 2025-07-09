@@ -14,8 +14,8 @@ This is the backend for a chat application built with Go. It provides user authe
 ## Installation
 1. Clone the repository:
     ```sh
-    git clone https://github.com/yourusername/chat-app-backend.git
-    cd chat-app-backend
+    git clone https://github.com/yourusername/chat-app-golang.git
+    cd chat-app-golang
     ```
 2. Install dependencies:
     ```sh
